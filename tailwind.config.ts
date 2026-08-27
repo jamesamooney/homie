@@ -53,6 +53,14 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          sage: "#9AAD96",
+          deepForest: "#243A33",
+          charcoal: "#111827",
+          warmSand: "#D6BE8A",
+          cream: "#F8F7F3",
+          stone: "#D6D3CD",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

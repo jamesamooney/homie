@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { Home } from "lucide-react";
+import Image from "next/image";
 
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
@@ -49,9 +49,7 @@ export default function LoginPage() {
       <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
         <Card className="w-full max-w-sm">
           <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Home className="h-5 w-5" />
-            </div>
+            <Image src="/logo.png" width={40} height={40} alt="Homie" priority className="mb-2 rounded-lg" />
             <CardTitle>Homie</CardTitle>
             <CardDescription>Your viewing hub, picking up where Rightmove leaves off.</CardDescription>
           </CardHeader>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
-import { Home, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
@@ -43,9 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="container flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Home className="h-4 w-4" />
-              </div>
+              <Image src="/logo.png" width={32} height={32} alt="Homie" priority className="rounded-lg" />
               Homie
             </Link>
             <nav className="hidden items-center gap-4 sm:flex">
