@@ -10,7 +10,17 @@ export default function App({ Component, pageProps }: AppProps) {
     <AppProvider>
       <TooltipProvider delayDuration={150}>
         <Component {...pageProps} />
-        <Toaster position="bottom-right" richColors />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            classNames: {
+              toast: "!bg-foreground !text-background !border-none !shadow-lg",
+              description: "!text-background/80",
+              actionButton: "!bg-background !text-foreground",
+              cancelButton: "!bg-background/20 !text-background",
+            },
+          }}
+        />
       </TooltipProvider>
     </AppProvider>
   );

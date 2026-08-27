@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { Bell } from "lucide-react";
 
 import { useApp } from "@/context/AppContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/layout/AppShell";
+import { EmptyState } from "@/components/EmptyState";
 import { cn } from "@/lib/utils";
 
 function absoluteTime(iso: string): string {
@@ -33,7 +35,7 @@ function NotificationsContent() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Notifications</h1>
       {sorted.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">No notifications yet.</p>
+        <EmptyState icon={Bell} title="No notifications yet" className="py-12" />
       ) : (
         <div className="divide-y rounded-lg border">
           {sorted.map((n) => {

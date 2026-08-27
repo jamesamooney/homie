@@ -39,7 +39,7 @@ export function PropertyCard({ property }: { property: Property }) {
     <Card data-testid="property-card" data-property-id={property.id}>
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
         <div className="flex min-w-0 flex-1 gap-4">
-          <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md bg-muted">
+          <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-primary/15 to-accent/15">
             <Image
               src={property.imageUrl}
               alt={property.title}

@@ -5,6 +5,7 @@ import { CalendarClock } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/layout/AppShell";
+import { EmptyState } from "@/components/EmptyState";
 import { StatusBadge } from "@/components/properties/StatusBadge";
 import { getAllViewings, splitUpcomingPast, type ScheduledViewing } from "@/lib/schedule";
 
@@ -50,10 +51,12 @@ function ScheduleContent() {
           Upcoming
         </h2>
         {upcoming.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
-            <CalendarClock className="mb-3 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">No upcoming viewings booked.</p>
-          </div>
+          <EmptyState
+            icon={CalendarClock}
+            title="No upcoming viewings"
+            description="No upcoming viewings booked."
+            className="py-12"
+          />
         ) : (
           <div className="rounded-lg border">
             {upcoming.map((s) => (

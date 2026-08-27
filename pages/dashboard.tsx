@@ -31,7 +31,7 @@ function DashboardContent() {
         <Link href="/properties" data-testid="tile-properties">
           <Card className="h-full transition-colors hover:bg-accent/50">
             <CardHeader className="flex-row items-center gap-3 space-y-0">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <HomeIcon className="h-5 w-5" />
               </div>
               <CardTitle className="text-lg">My Properties</CardTitle>
@@ -48,7 +48,7 @@ function DashboardContent() {
         <Link href="/schedule" data-testid="tile-schedule">
           <Card className="h-full transition-colors hover:bg-accent/50">
             <CardHeader className="flex-row items-center gap-3 space-y-0">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <CalendarClock className="h-5 w-5" />
               </div>
               <CardTitle className="text-lg">Viewing Schedule</CardTitle>
@@ -74,7 +74,7 @@ function DashboardContent() {
         <Link href="/notifications" data-testid="tile-notifications">
           <Card className="h-full transition-colors hover:bg-accent/50">
             <CardHeader className="flex-row items-center gap-3 space-y-0">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Bell className="h-5 w-5" />
               </div>
               <CardTitle className="text-lg">Notifications</CardTitle>
