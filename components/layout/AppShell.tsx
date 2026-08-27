@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { BottomNav } from "@/components/layout/BottomNav";
 
 const NAV_LINKS = [
   { href: "/properties", label: "Properties" },
@@ -66,7 +67,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="mr-2 hidden text-sm text-muted-foreground sm:inline">
               {user}
             </span>
-            <NotificationBell />
+            <span className="hidden sm:inline-flex">
+              <NotificationBell />
+            </span>
             <DarkModeToggle />
             <Button variant="ghost" size="icon" aria-label="Log out" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
@@ -74,7 +77,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="container py-8">{children}</main>
+      <main className="container py-8 pb-24 sm:pb-8">{children}</main>
+      <BottomNav />
     </div>
   );
 }

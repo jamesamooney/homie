@@ -44,7 +44,7 @@ function ScheduleContent() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold">Viewing Schedule</h1>
+      <h1 className="font-heading text-2xl font-semibold">Viewing Schedule</h1>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">

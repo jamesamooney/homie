@@ -24,7 +24,7 @@ function DashboardContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Welcome back{user ? `, ${user}` : ""}</h1>
+        <h1 className="font-heading text-2xl font-semibold">Welcome back{user ? `, ${user}` : ""}</h1>
         <p className="text-sm text-muted-foreground">Here&rsquo;s where things stand.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

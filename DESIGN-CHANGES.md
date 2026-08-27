@@ -1,83 +1,74 @@
-# Design changes to bring in from ollie-homie-mvp
+# Design changes to bring in from the Stitch concepts (`ollie-stitch`)
 
-**Purpose:** `homie` (this repo) is our real build — it implements the actual PRD (buyer viewing hub: sign up, track properties via Rightmove link, book viewings, decide interested/not interested, make an offer, notifications). `ollie-homie-mvp` (`/Users/jmooney/ai-step-change/ollie-homie-mvp`) is a static HTML/CSS/JS prototype of a *different, broader* product concept (a multi-role "moving hub" with milestones, tasks, messages, documents, an AI assistant) with almost no real functionality — most of its nav items are literal "Coming later in this build" stubs. It has near-zero functional overlap with our PRD, but its **visual design system is considerably more polished** than our current shadcn-default look, and several concrete UI patterns are worth lifting even though the underlying feature isn't being copied.
+**Purpose:** `homie` (this repo) implements the actual PRD — a buyer viewing hub: sign up, track properties via a Rightmove link, book viewings, decide interested/not interested, make an offer, get notifications. The six Stitch exports in `/Users/jmooney/ai-step-change/ollie-stitch` (`stitch_homie_transaction_operating_system(1-5).zip`) are AI-generated mockups for a **much broader "transaction operating system" product** — Mission Control dashboard with blockers/ETA, a multi-step Journey stepper for sale+purchase, a Document Hub, a Tasks list, and an AI Chat assistant. That product has almost no functional overlap with our PRD (no documents, no legal/conveyancing journey, no chat, no multi-transaction tracking in our data model). This doc only pulls in **visual/UI-system ideas that fit our existing, working functionality** — nothing here should pull in the broader feature set.
 
-This doc only covers **design/UI-system changes**, not features. Nothing here should pull in ollie's actual product scope (milestones, tasks, messages, documents, multi-role switching, AI assistant) — that's out of scope for our PRD.
-
----
-
-## Current state of our app (baseline, for contrast)
-
-Screenshots taken from a live `npm run dev` run, confirmed working:
-- Login/signup: generic shadcn card, default blue primary (`--primary: 221.2 83.2% 53.3%`), plain white background, no visual identity beyond a small home-icon badge.
-- Dashboard: three plain white tiles ("My Properties", "Viewing Schedule", "Notifications"), no colour or texture, feels like an admin scaffold rather than a consumer product.
-- Properties page / PropertyCard: functionally complete (status badge, action buttons with tooltip-on-disabled, edit/remove), but visually flat — default shadcn `Card`, thin borders, no shadow depth, grey placeholder image box, badge colours are the default shadcn palette (blue/green/amber/red) with no thought given to a cohesive "brand" feel.
-- Dark mode: works (class-based, toggle in header) but is just the default shadcn dark palette — cold slate blue-black, not tailored.
-- No sidebar — top nav bar with two links. This is fine for our 2-page app and shouldn't change structurally.
-
-## ollie-homie-mvp's design system (source of the ideas below)
-
-Key source files: `css/tokens.css`, `css/base.css`, `css/components.css`, `css/layout.css`, `css/views.css`.
-
-Notable properties of their system:
-- **Warm, editorial palette** instead of cold default-blue: warm paper background (`--paper: #fbf9f6`), off-white surfaces, ink-based text colours instead of pure black/grey, a muted sage-green primary (`--primary-500: #5f8a5b`) and a terracotta accent (`--accent-500: #c97a52`) used sparingly. Status colours are deliberately "non-alarmist" (softened blues/oranges/greens rather than saturated shadcn reds/greens).
-- **Real design tokens file** — every colour, spacing step, radius, shadow and motion curve is a CSS custom property in one file, so the whole app can be reskinned from one place. We already have this pattern via Tailwind CSS variables (`styles/globals.css` + `tailwind.config.ts`), but our token *values* are the unmodified shadcn defaults.
-- **Layered shadows + soft radii**: `--radius-lg: 16px`, `--radius-pill` for badges/chips/avatars, a 4-tier shadow scale (`sm/md/lg/xl`) used to give cards, modals and the floating action button real depth on hover — ours currently uses flat `shadow-sm` everywhere from shadcn defaults.
-- **Buttons with a gradient + lift-on-hover**: primary buttons use a subtle vertical gradient and translate up 1px with a bigger shadow on hover/press, giving tactile feedback our flat shadcn buttons don't have.
-- **Status badges as pills with icons**, colour-coded per state (complete/in-progress/blocked/not-started/error), consistently used everywhere status appears — same idea as our `StatusBadge`, just visually richer (icon + pill + softer colour).
-- **Card hover/press states, `.btn:active { translateY(1px) }`** — small motion details that make the whole thing feel more "designed."
-- **A glass/blur top bar** (`backdrop-filter: blur`) that gains a shadow only once the page scrolls — nice polish, low effort.
-- **A floating "Ask Homie" FAB** — bottom-right circular button that expands to show a label on hover. Not something we need (no AI assistant in our PRD) but the *component pattern* (FAB with expanding label) could be reused for something like a persistent "Add Property" quick action if desired — optional, not required.
-- **Toasts styled dark-on-light-background** (ink-coloured toast, paper text) instead of default shadcn/sonner white toast — more distinctive.
-- **Empty/loading/blocked state panel component** (`state-panel`) — icon in a soft circular badge, heading, supporting copy — reused consistently for every "nothing here yet" case. We have one bespoke empty state (`properties.tsx` `EmptyState`); worth generalizing this pattern since we'll likely want it on the dashboard tiles too.
-- **Dark mode explicitly deferred in ollie** (they left a comment marker, light-only by design for demo clarity) — so nothing to copy there; our dark mode already works and should just get restyled with the new tokens, not architecturally changed.
+This replaces the previous version of this file (which covered bringing design ideas in from `ollie-homie-mvp`). That work has already been actioned: the app already runs a warm sage/paper palette, soft pill-shaped status badges, shadowed/lifted cards and buttons, and a generalized `EmptyState` component. Confirmed by re-running the app (`npm run dev`) and screenshotting login, dashboard, properties (populated + empty), schedule, and notifications in both light/dark and desktop/mobile viewports before writing this doc.
 
 ---
 
-## Recommended changes (design system only)
+## Current state of our app (baseline, re-verified)
 
-### 1. Replace the default shadcn colour tokens with a warmer, branded palette
-- Edit `styles/globals.css` CSS variables (`--background`, `--primary`, `--secondary`, `--muted`, `--accent`, `--card`, `--border`, etc.) for both `:root` and `.dark` to move off default "Tailwind blue on white/slate" toward something closer to ollie's warm paper/ink/sage palette — e.g. warm off-white background instead of pure white, a muted green or warm neutral as primary instead of saturated blue, softened status colours.
-- Keep the HSL-variable + Tailwind-alias mechanism we already have (`tailwind.config.ts` `colors.primary.DEFAULT: "hsl(var(--primary))"` etc.) — just change the values, not the architecture.
-- Update `--radius` from `0.5rem` toward something slightly larger (ollie uses 12–16px for cards) for a softer feel.
+- **Pages:** `login`, `dashboard` (3 tiles: My Properties / Viewing Schedule / Notifications), `properties` (tabbed Active/Archived, `PropertyCard` grid, Add Property dialog, Book Viewing / Decide / Make Offer dialogs per card), `schedule` (Upcoming/Past list of viewings), `notifications` (flat list, mark-all-read on open).
+- **Shell:** `components/layout/AppShell.tsx` — single sticky top header (logo + "Properties"/"Schedule" text links, hidden below `sm`, user name, notification bell, dark-mode toggle, logout). On mobile the nav links simply disappear (`hidden sm:flex`) — there is **no mobile navigation affordance at all** below the `sm` breakpoint other than the bell icon and logo-as-home-link. This is the main structural gap.
+- **Visual system already matches the "warm/editorial" direction:** `styles/globals.css` uses a warm off-white background (`36 38.5% 97.5%`), muted sage primary (`114.9 20.5% 44.9%`), terracotta-ish accent, `--radius: 0.75rem`; `components/ui/card.tsx` has a soft diffused shadow; `components/ui/button.tsx` has `active:translate-y-px` press feedback; `components/ui/badge.tsx` uses soft-tinted pill badges per status; `components/EmptyState.tsx` is a shared icon-in-circle/heading/description/actions component reused across properties/schedule/notifications. **None of this needs to change.**
+- **Typography:** default Tailwind/shadcn system font stack (no custom webfont loaded) — this is the one visual gap versus the Stitch mockups' more considered type system.
 
-### 2. Add shadow depth and hover/press motion to cards and buttons
-- `components/ui/card.tsx`: add a subtle shadow (beyond the current flat `shadow-sm`) and a hover-elevate transition on interactive cards (dashboard tiles already use `hover:bg-accent/50` — pair that with a shadow lift, matching ollie's `.card` hover treatment).
-- `components/ui/button.tsx`: add a small `active:translate-y-px` / hover shadow treatment to the `default` (primary) variant so buttons feel pressed, matching ollie's `.btn--primary` tactile feedback. Pure CSS/Tailwind class change, no structural change.
+## The Stitch concept's design system (source: `DESIGN.md` inside each export — identical across all 6)
 
-### 3. Restyle status badges with the "non-alarmist" colour approach
-- `lib/status.ts` / `components/properties/StatusBadge.tsx` currently map to shadcn badge variants (`default`, `secondary`, `success`, `warning`, `outline`). Keep the logic, but retune `components/ui/badge.tsx` variant colours to softer, pill-shaped, icon-optional badges in the spirit of ollie's `.badge--complete/progress/blocked/not_started` (soft-tinted background + matching text colour, not solid saturated fill).
-- Optional: add a small leading icon to the badge (lucide-react icons are already a dependency) matching ollie's icon-in-badge pattern — e.g. a calendar icon for "Viewing Scheduled," a checkmark for "Interested," an archive icon for "Archived."
+- **Name:** "Serene Dwelling." Same palette family as before (warm cream `#fbf9f5` surface, deep sage `#334f2b`/`#496640` primary, charcoal ink text) — validates the palette direction we've already shipped, doesn't require new palette work.
+- **Typography:** dual-font system — **Hanken Grotesk** (headlines, tightened letter-spacing, weight 500–600) + **Inter** (body/labels/inputs, weight 400 body / 500–600 interactive). We currently use neither; this is a genuinely new, low-risk upgrade.
+- **Elevation:** "tonal layers + ambient shadows" — very soft, highly diffused shadows (`y:4px blur:20px opacity:0.04`), not heavy drop shadows. Close to what we already have in `card.tsx`; no change needed.
+- **Shape:** 8px buttons/inputs, 16px cards, fully-pill status/progress elements — matches our current `--radius: 0.75rem` (12px) reasonably closely already.
+- **Status pills:** "soft-on-soft" (pale tint background + darker text of the same hue) — this is exactly what `badge.tsx` already does. No change needed.
+- **The one structural UI pattern not in our app at all: a fixed bottom tab bar for mobile**, used on every mockup screen (`nav` fixed to viewport bottom, `backdrop-blur`, active tab shown in solid primary colour with filled icon, inactive tabs in muted outline icon + label). In the mockups it has 5 destinations (Control/Journey/Tasks/Files/Chat) because it's built for the broader product — we don't have those pages.
 
-### 4. Give the dashboard and empty states more visual identity
-- `pages/dashboard.tsx`: the three tiles are currently plain white cards with a small icon badge — apply the new shadow/hover treatment from #2, and consider a subtle accent-tinted background on the icon badges (ollie uses `--role-accent-bg` tinting) instead of solid `bg-primary`.
-- Generalize the `EmptyState` pattern already written ad hoc in `pages/properties.tsx` into a small reusable component (icon in a soft circular tint, heading, supporting copy, actions) so it can be reused on `pages/schedule.tsx` and `pages/notifications.tsx` empty states too (right now those are just a plain "No X yet" text string per the screenshots — e.g. `/tmp/homie-screens/schedule.png`, `notifications.png` — no icon, no visual match to the properties empty state).
+---
 
-### 5. Topbar polish
-- `components/layout/AppShell.tsx`: the header already does `backdrop-blur` — good. Consider adding ollie's "shadow only appears once scrolled" detail (small `scroll` listener toggling a class) for a bit of extra polish. Low priority, cosmetic only.
+## Recommended changes
 
-### 6. Toast styling
-- We use `sonner` (already a dependency) with default styling. Consider customizing its theme (ink-on-paper look, matching the rest of the new palette) rather than leaving default light/dark sonner styling, so success/error toasts (e.g. "Viewing booked — confirmed instantly," "Offer email generated and saved") feel consistent with the rest of the UI.
+### 1. Add a fixed bottom navigation bar on mobile (the main ask)
 
-### 7. Property card image placeholder
-- Currently a flat grey box (`bg-muted`) when no real image is available. ollie uses a soft gradient placeholder (`linear-gradient(135deg, primary-100, accent-100)`) for its property card image slot — a small, cheap visual upgrade for the (likely common, given Rightmove-enrichment can fail) manual-entry / no-image case.
+This is the one piece of Stitch's shell that's a genuine structural gap in our app today, not just a colour/shadow tweak — and it directly fixes the "no mobile nav" gap noted above.
+
+- **Scope:** mobile only (below the existing `sm` breakpoint where the current top-bar text links already disappear). **Desktop keeps the current top bar exactly as-is** — no changes to `sm:flex` nav, no changes to header layout on wider viewports.
+- **Component:** new `components/layout/BottomNav.tsx`, rendered from `AppShell.tsx` alongside the existing `<header>`, wrapped in a `sm:hidden` container fixed to the bottom of the viewport (`fixed bottom-0 inset-x-0 z-40`), styled to match the existing header's `backdrop-blur` + `border-t` + `bg-background/95` treatment already used at the top.
+- **Destinations — map to our actual 4 routes** (not Stitch's 5, since we have no Journey/Tasks/Files/Chat):
+  - **Dashboard** (`/dashboard`) — icon `LayoutDashboard` or `Home`, label "Home"
+  - **Properties** (`/properties`) — icon `Home` or `Building2`, label "Properties"
+  - **Schedule** (`/schedule`) — icon `CalendarClock` (already imported elsewhere), label "Schedule"
+  - **Notifications** (`/notifications`) — icon `Bell`, label "Alerts", with the existing unread-count treatment (small dot/count, same source as `NotificationBell`) shown on the icon instead of a separate header bell
+- Active tab styled per Stitch: solid primary-coloured icon + label (`text-primary`, filled icon variant where lucide supports it) vs muted `text-muted-foreground` for inactive, using `router.pathname` exactly like the existing desktop nav's active-state check.
+- Since the bottom nav covers notifications and navigation, **hide the header's `NotificationBell` and the "Homie" wordmark's excess chrome on mobile** is not necessary — keep the header as-is (logo + user + dark-mode toggle + logout) and simply stop rendering the bell twice; the mobile bell moves to the bottom nav's "Alerts" tab only. Logout and dark-mode toggle stay in the top header on all breakpoints — they're infrequent actions and don't need bottom-nav space.
+- Add bottom padding to `<main>` on mobile (e.g. `pb-20 sm:pb-8`) so page content doesn't sit under the fixed bar.
+- This is a pure additive layout change — no page, dialog, or data-flow logic changes required. `data-testid`s on existing header elements are untouched; the Playwright e2e suite drives flows through the pages, not the header, so this should not require e2e changes (worth a quick check once implemented).
+
+### 2. Adopt the dual-font system (Hanken Grotesk + Inter)
+
+- Load both via `next/font/google` in `pages/_app.tsx` (avoids a render-blocking `<link>`, keeps our existing no-external-CSS-file approach).
+- Wire `font-sans` (body/Inter) as the Tailwind default and add a `font-heading` (Hanken Grotesk) utility in `tailwind.config.ts`, applied to page `<h1>`s and `CardTitle` only — a small, contained change, not a full restyle.
+- Low risk, no functional impact, closes the one real gap between our type system and the mockups' more "premium SaaS" feel.
+
+### 3. Optional: give the Schedule page's next upcoming viewing a highlighted card treatment
+
+- Stitch's "Your Viewings" screen shows the next upcoming viewing as a larger photo card (property image, date pill overlay, agent, "Get Directions") versus older viewings shown as plain rows.
+- We already store `property.imageUrl` (used in `PropertyCard`) and have all the data (`ScheduledViewing` → `viewing.datetime`, `property`) needed to do this with zero new state — `pages/schedule.tsx`'s `ScheduleRow` for just the *first* upcoming item could render a bigger card variant (image thumbnail + date badge) while the rest of the upcoming/past lists stay as the current compact rows.
+- Purely presentational, optional — current flat list already works and is functionally complete; only worth doing if there's spare time after #1.
 
 ---
 
 ## Explicitly NOT recommended (out of scope)
 
-- **Do not** adopt ollie's sidebar+topbar shell layout, multi-role switching, or its route structure — our app is a simpler 2-nav-link buyer-only app per the PRD, and ollie's shell is built for a 4-role, 9-route product we're not building.
-- **Do not** pull in the "Ask Homie" AI assistant panel/FAB, milestones/journey timeline, tasks list, messages/threads, or documents views — none of this is in our PRD scope, and most of it isn't even really built in ollie itself (stub pages).
-- **Do not** copy ollie's dark-mode decision (they deliberately shipped light-only) — our PRD requires dark mode and we already have a working implementation; only the colour values should change, not the presence of the feature.
-- **Do not** restructure our token architecture (Tailwind CSS variables) to match ollie's raw-CSS-custom-properties approach — the mechanism is equivalent, only the values need to change.
+- **Do not** build a "Mission Control" dashboard with ETA countdowns, a "Current Blocker" panel, or a sale/purchase progress-percentage pair — our data model has no transaction-completion date, blocker, or dual sale+purchase concept; our dashboard's 3-tile summary already covers the PRD's scope.
+- **Do not** build the "Your Journey" vertical stepper (Property listed → Offer accepted → Solicitor instructed → Enquiries resolved → Exchange & Completion) — this is post-offer conveyancing tracking, entirely outside our PRD's "book viewings, decide, make an offer" scope.
+- **Do not** build the Document Hub, Tasks list, or AI Chat — none of these exist in our PRD or data model; the bottom nav should only ever contain routes that actually exist in this app.
+- **Do not** copy the "Get an AI Update" floating pill button — no AI assistant in our PRD.
+- **Do not** re-theme colours, shadows, radii, or badge styling — that work is already done and already close to the Stitch palette; re-doing it isn't needed.
+- **Do not** change the desktop layout — the bottom nav is mobile-only; desktop keeps its current top bar unchanged.
 
 ## Suggested order of work for the next session
 
-1. Retune `styles/globals.css` colour tokens (light + dark) and `--radius`.
-2. Update `components/ui/badge.tsx` variant styling for the softer pill look.
-3. Update `components/ui/card.tsx` and `components/ui/button.tsx` for shadow/hover/press treatment.
-4. Extract a shared `EmptyState` component and use it on dashboard/properties/schedule/notifications.
-5. Polish property card image placeholder gradient.
-6. Optional: sonner toast theming, scroll-shadow topbar detail.
-
-After each step, visually re-check both light and dark mode on: login, dashboard, properties (populated via "Load demo data"), and one dialog (Book Viewing or Make an Offer), since those are the screens most exercised by the Playwright e2e suite already in `e2e/`.
+1. Build `components/layout/BottomNav.tsx` and wire it into `AppShell.tsx` (mobile-only, 4 tabs, active-state matching `router.pathname`), remove the duplicate mobile header bell, add `pb-*` spacing to `<main>`.
+2. Run the existing Playwright suite (`npm run test:e2e`) to confirm no regressions from the header/layout change, especially any test that measures viewport at mobile width.
+3. Add Hanken Grotesk + Inter via `next/font/google`, wire `font-sans`/`font-heading` in Tailwind config, apply heading font to `h1`/`CardTitle` only.
+4. Re-screenshot dashboard/properties/schedule/notifications at a mobile viewport (e.g. 390×844) in both light and dark mode to confirm the bottom nav reads correctly against both themes and doesn't overlap toast notifications (`sonner` is positioned `bottom-right` — check it doesn't collide with the new bottom nav on mobile; may need `position="top-center"` on mobile or extra bottom offset).
+5. Optional: schedule page hero card for the next upcoming viewing (#3 above).

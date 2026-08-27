@@ -33,7 +33,7 @@ function NotificationsContent() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Notifications</h1>
+      <h1 className="font-heading text-2xl font-semibold">Notifications</h1>
       {sorted.length === 0 ? (
         <EmptyState icon={Bell} title="No notifications yet" className="py-12" />
       ) : (
