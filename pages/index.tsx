@@ -9,7 +9,7 @@ export default function IndexPage() {
 
   useEffect(() => {
     if (!authReady) return;
-    router.replace(user ? "/properties" : "/login");
+    router.replace(user ? "/dashboard" : "/login");
   }, [authReady, user, router]);
 
   return null;

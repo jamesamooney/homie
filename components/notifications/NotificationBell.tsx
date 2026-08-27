@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Bell } from "lucide-react";
 
 import { useApp } from "@/context/AppContext";
@@ -49,34 +50,40 @@ export function NotificationBell() {
         <div className="border-b px-4 py-3">
           <p className="text-sm font-semibold">Notifications</p>
         </div>
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto">
           {sorted.length === 0 ? (
             <p className="p-4 text-sm text-muted-foreground">No notifications yet.</p>
           ) : (
-            sorted.map((n) => (
+            sorted.slice(0, 8).map((n) => (
               <div
                 key={n.id}
                 data-testid="notification-item"
                 className={cn(
-                  "flex items-start gap-2 border-b px-4 py-3 text-sm last:border-b-0",
+                  "flex items-center gap-2 border-b px-4 py-2 text-sm last:border-b-0",
                   !n.read && "bg-accent/50",
                 )}
               >
                 <span
                   className={cn(
-                    "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                    "h-2 w-2 shrink-0 rounded-full",
                     n.read ? "bg-transparent" : "bg-primary",
                   )}
                   aria-hidden
                 />
-                <div>
-                  <p>{n.message}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(n.createdAt)}</p>
-                </div>
+                <span className="min-w-0 flex-1 truncate">{n.title ?? n.message}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {timeAgo(n.createdAt)}
+                </span>
               </div>
             ))
           )}
         </div>
+        <Link
+          href="/notifications"
+          className="block border-t px-4 py-2.5 text-center text-sm font-medium text-primary hover:underline"
+        >
+          View all notifications
+        </Link>
       </PopoverContent>
     </Popover>
   );

@@ -26,7 +26,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (authReady && user) {
-      router.replace("/properties");
+      router.replace("/dashboard");
     }
   }, [authReady, user, router]);
 
@@ -38,7 +38,7 @@ export default function LoginPage() {
       return;
     }
     setError(null);
-    router.replace("/properties");
+    router.replace("/dashboard");
   };
 
   return (

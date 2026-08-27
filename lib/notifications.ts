@@ -4,12 +4,14 @@ import { generateId } from "@/lib/id";
 export function createNotification(
   type: NotificationType,
   propertyId: string,
+  title: string,
   message: string,
 ): Notification {
   return {
     id: generateId("notif"),
     type,
     propertyId,
+    title,
     message,
     read: false,
     createdAt: new Date().toISOString(),
@@ -45,7 +47,9 @@ export function computeUpcomingReminders(
       const message = `Reminder: your viewing at ${property.address} is coming up (${formatted}).`;
       const key = property.id + "|" + message;
       if (existingKeys.has(key)) continue;
-      reminders.push(createNotification("viewing_reminder", property.id, message));
+      reminders.push(
+        createNotification("viewing_reminder", property.id, "Upcoming viewing reminder", message),
+      );
     }
   }
 

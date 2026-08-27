@@ -4,6 +4,10 @@ interface EnrichData {
   title: string;
   address: string;
   imageUrl: string;
+  bedrooms?: number;
+  price?: string;
+  listedDate?: string;
+  sellingAgent?: string;
 }
 
 type EnrichResponse =
@@ -35,6 +39,35 @@ function extractMetaContent(html: string, property: string): string | undefined 
     if (match?.[1]) return match[1];
   }
   return undefined;
+}
+
+/**
+ * Best-effort extraction of listing facts beyond the core og: tags. Rightmove doesn't
+ * offer an API, so this reads whatever public page content is available — JSON-LD first
+ * (most stable), falling back to regex over the raw HTML/embedded page-model JSON.
+ * Every field is optional; a miss here never blocks adding the property (FR-02).
+ */
+function extractBedrooms(html: string, title?: string): number | undefined {
+  const source = title ?? html;
+  const match = source.match(/(\d+)\s*bed/i);
+  return match ? Number(match[1]) : undefined;
+}
+
+function extractPrice(html: string): string | undefined {
+  const jsonLdMatch = html.match(/"price"\s*:\s*"?([\d,]{4,})"?/i);
+  if (jsonLdMatch) return `£${jsonLdMatch[1]}`;
+  const match = html.match(/£[\d,]{4,}/);
+  return match?.[0];
+}
+
+function extractListedDate(html: string): string | undefined {
+  const match = html.match(/(?:Added|Reduced) on (\d{2}\/\d{2}\/\d{4})/i);
+  return match?.[1];
+}
+
+function extractSellingAgent(html: string): string | undefined {
+  const match = html.match(/"branchDisplayName"\s*:\s*"([^"]+)"/i);
+  return match?.[1];
 }
 
 export default async function handler(
@@ -99,6 +132,10 @@ export default async function handler(
         title,
         address: description ?? title,
         imageUrl: imageUrl ?? "",
+        bedrooms: extractBedrooms(html, title),
+        price: extractPrice(html),
+        listedDate: extractListedDate(html),
+        sellingAgent: extractSellingAgent(html),
       },
     });
   } catch {

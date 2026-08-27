@@ -45,14 +45,22 @@ interface AppContextValue {
     address: string;
     imageUrl: string;
     enrichedAutomatically: boolean;
+    bedrooms?: number;
+    price?: string;
+    listedDate?: string;
+    sellingAgent?: string;
   }) => void;
   removeProperty: (propertyId: string) => void;
+  updatePropertyDetails: (
+    propertyId: string,
+    details: Partial<Pick<Property, "bedrooms" | "price" | "listedDate" | "sellingAgent">>,
+  ) => void;
   bookViewing: (propertyId: string, slot: ViewingSlot) => void;
   markAttended: (propertyId: string, viewingId: string) => void;
   decideInterested: (propertyId: string) => void;
   decideNotInterested: (
     propertyId: string,
-    reason: NotInterestedReason,
+    reasons: NotInterestedReason[],
     detail?: string,
   ) => void;
   makeOffer: (propertyId: string, offer: Omit<Offer, "createdAt">) => void;
@@ -116,6 +124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           createNotification(
             "new_slots",
             target.id,
+            "New slots available",
             `New viewing slots are available for ${target.address}.`,
           ),
           ...prev,
@@ -176,6 +185,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       decision: null,
       removed: false,
       createdAt: new Date().toISOString(),
+      bedrooms: input.bedrooms,
+      price: input.price,
+      listedDate: input.listedDate,
+      sellingAgent: input.sellingAgent,
     };
     setProperties((prev) => [property, ...prev]);
   }, []);
@@ -183,6 +196,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const removeProperty = useCallback((propertyId: string) => {
     setProperties((prev) => prev.filter((p) => p.id !== propertyId));
   }, []);
+
+  const updatePropertyDetails = useCallback<AppContextValue["updatePropertyDetails"]>(
+    (propertyId, details) => {
+      setProperties((prev) =>
+        prev.map((p) => (p.id === propertyId ? { ...p, ...details } : p)),
+      );
+    },
+    [],
+  );
 
   const bookViewing = useCallback((propertyId: string, slot: ViewingSlot) => {
     const viewing: Viewing = {
@@ -210,6 +232,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createNotification(
         "viewing_confirmed",
         propertyId,
+        "Viewing confirmed",
         `Viewing confirmed for ${propertyAddress || "your property"} on ${formatted}.`,
       ),
       ...prev,
@@ -240,14 +263,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const decideNotInterested = useCallback(
-    (propertyId: string, reason: NotInterestedReason, detail?: string) => {
+    (propertyId: string, reasons: NotInterestedReason[], detail?: string) => {
       setProperties((prev) =>
         prev.map((p) =>
           p.id === propertyId
             ? {
                 ...p,
                 decision: "not_interested" as InterestDecision,
-                notInterestedReason: reason,
+                notInterestedReasons: reasons,
                 notInterestedDetail: detail,
               }
             : p,
@@ -271,6 +294,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createNotification(
         "offer_generated",
         propertyId,
+        "Offer email generated",
         `Offer email generated for ${propertyAddress || "your property"}.`,
       ),
       ...prev,
@@ -301,6 +325,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     logOut,
     addProperty,
     removeProperty,
+    updatePropertyDetails,
     bookViewing,
     markAttended,
     decideInterested,

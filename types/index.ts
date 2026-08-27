@@ -44,11 +44,15 @@ export interface Property {
   enrichedAutomatically: boolean;
   viewings: Viewing[];
   decision: InterestDecision;
-  notInterestedReason?: NotInterestedReason;
+  notInterestedReasons?: NotInterestedReason[];
   notInterestedDetail?: string;
   offer?: Offer;
   removed: boolean;
   createdAt: string;
+  bedrooms?: number;
+  price?: string;
+  listedDate?: string;
+  sellingAgent?: string;
 }
 
 export type NotificationType =
@@ -61,6 +65,7 @@ export interface Notification {
   id: string;
   type: NotificationType;
   propertyId: string;
+  title: string;
   message: string;
   read: boolean;
   createdAt: string;

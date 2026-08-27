@@ -72,6 +72,10 @@ export function createDemoProperties(): Property[] {
       decision: null,
       removed: false,
       createdAt: past(5),
+      bedrooms: 3,
+      price: "£425,000",
+      listedDate: "02/07/2026",
+      sellingAgent: "Hunters",
     },
     {
       id: "demo_2",
@@ -91,6 +95,10 @@ export function createDemoProperties(): Property[] {
       decision: null,
       removed: false,
       createdAt: past(4),
+      bedrooms: 2,
+      price: "£310,000",
+      listedDate: "14/07/2026",
+      sellingAgent: "Foxtons",
     },
     {
       id: "demo_3",
@@ -110,6 +118,10 @@ export function createDemoProperties(): Property[] {
       decision: "interested",
       removed: false,
       createdAt: past(10),
+      bedrooms: 4,
+      price: "£650,000",
+      listedDate: "20/06/2026",
+      sellingAgent: "Savills",
     },
     {
       id: "demo_4",
@@ -127,10 +139,13 @@ export function createDemoProperties(): Property[] {
         },
       ],
       decision: "not_interested",
-      notInterestedReason: "Noise",
+      notInterestedReasons: ["Noise"],
       notInterestedDetail: undefined,
       removed: false,
       createdAt: past(14),
+      bedrooms: 1,
+      price: "£220,000",
+      sellingAgent: "Knight Frank",
     },
   ];
 }

@@ -31,6 +31,10 @@ export function AddPropertyDialog() {
   const [manualTitle, setManualTitle] = useState("");
   const [manualAddress, setManualAddress] = useState("");
   const [manualImage, setManualImage] = useState("");
+  const [manualBedrooms, setManualBedrooms] = useState("");
+  const [manualPrice, setManualPrice] = useState("");
+  const [manualListedDate, setManualListedDate] = useState("");
+  const [manualAgent, setManualAgent] = useState("");
 
   const reset = () => {
     setStage("link");
@@ -40,6 +44,10 @@ export function AddPropertyDialog() {
     setManualTitle("");
     setManualAddress("");
     setManualImage("");
+    setManualBedrooms("");
+    setManualPrice("");
+    setManualListedDate("");
+    setManualAgent("");
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -65,6 +73,10 @@ export function AddPropertyDialog() {
           address: body.data.address,
           imageUrl: body.data.imageUrl || PLACEHOLDER_IMAGE,
           enrichedAutomatically: true,
+          bedrooms: body.data.bedrooms,
+          price: body.data.price,
+          listedDate: body.data.listedDate,
+          sellingAgent: body.data.sellingAgent,
         });
         toast.success("Property added — details pulled automatically from Rightmove.");
         handleOpenChange(false);
@@ -92,6 +104,10 @@ export function AddPropertyDialog() {
       address: manualAddress,
       imageUrl: manualImage || PLACEHOLDER_IMAGE,
       enrichedAutomatically: false,
+      bedrooms: manualBedrooms.trim() ? Number(manualBedrooms) : undefined,
+      price: manualPrice.trim() || undefined,
+      listedDate: manualListedDate.trim() || undefined,
+      sellingAgent: manualAgent.trim() || undefined,
     });
     toast.success("Property added.");
     handleOpenChange(false);
@@ -175,6 +191,49 @@ export function AddPropertyDialog() {
                 onChange={(e) => setManualImage(e.target.value)}
                 placeholder="https://…"
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="manual-bedrooms">Bedrooms (optional)</Label>
+                <Input
+                  id="manual-bedrooms"
+                  data-testid="manual-bedrooms-input"
+                  inputMode="numeric"
+                  value={manualBedrooms}
+                  onChange={(e) => setManualBedrooms(e.target.value)}
+                  placeholder="3"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="manual-price">Price (optional)</Label>
+                <Input
+                  id="manual-price"
+                  data-testid="manual-price-input"
+                  value={manualPrice}
+                  onChange={(e) => setManualPrice(e.target.value)}
+                  placeholder="£450,000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="manual-listed-date">Listed date (optional)</Label>
+                <Input
+                  id="manual-listed-date"
+                  data-testid="manual-listed-date-input"
+                  value={manualListedDate}
+                  onChange={(e) => setManualListedDate(e.target.value)}
+                  placeholder="12/03/2026"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="manual-agent">Estate agent (optional)</Label>
+                <Input
+                  id="manual-agent"
+                  data-testid="manual-agent-input"
+                  value={manualAgent}
+                  onChange={(e) => setManualAgent(e.target.value)}
+                  placeholder="Foxtons"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setStage("link")}>

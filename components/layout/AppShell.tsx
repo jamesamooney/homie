@@ -1,10 +1,17 @@
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { Home, LogOut } from "lucide-react";
 
 import { useApp } from "@/context/AppContext";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+
+const NAV_LINKS = [
+  { href: "/properties", label: "Properties" },
+  { href: "/schedule", label: "Schedule" },
+];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -18,12 +25,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Home className="h-4 w-4" />
-            </div>
-            Homie
+        <div className="container flex h-16 items-center justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Home className="h-4 w-4" />
+              </div>
+              Homie
+            </Link>
+            <nav className="hidden items-center gap-4 sm:flex">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+                    router.pathname === link.href && "text-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
           <div className="flex items-center gap-1">
             <span className="mr-2 hidden text-sm text-muted-foreground sm:inline">

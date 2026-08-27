@@ -10,5 +10,7 @@ export async function signUp(page: Page, username: string, password = "password1
   await page.getByLabel("Username").fill(username);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Create account" }).click();
-  await page.waitForURL("/properties");
+  await page.waitForURL("/dashboard");
+  // Most flows still act on the property list, which is one level in from the dashboard.
+  await page.goto("/properties");
 }

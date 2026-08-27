@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 import type { Property } from "@/types";
 import { useApp } from "@/context/AppContext";
@@ -12,6 +12,16 @@ import { ActionButton } from "@/components/properties/PropertyActions";
 import { BookViewingDialog } from "@/components/properties/BookViewingDialog";
 import { InterestDecisionDialog } from "@/components/properties/InterestDecisionDialog";
 import { MakeOfferDialog } from "@/components/properties/MakeOfferDialog";
+import { EditPropertyDetailsDialog } from "@/components/properties/EditPropertyDetailsDialog";
+
+function SummaryField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium">{value || "—"}</p>
+    </div>
+  );
+}
 
 export function PropertyCard({ property }: { property: Property }) {
   const { removeProperty, markAttended } = useApp();
@@ -19,6 +29,7 @@ export function PropertyCard({ property }: { property: Property }) {
   const [bookOpen, setBookOpen] = useState(false);
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const nextUnattendedViewing = property.viewings.find((v) => !v.attended);
   const showAttendDemoControl =
@@ -27,7 +38,7 @@ export function PropertyCard({ property }: { property: Property }) {
   return (
     <Card data-testid="property-card" data-property-id={property.id}>
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
-        <div className="flex gap-4">
+        <div className="flex min-w-0 flex-1 gap-4">
           <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md bg-muted">
             <Image
               src={property.imageUrl}
@@ -38,29 +49,46 @@ export function PropertyCard({ property }: { property: Property }) {
               unoptimized
             />
           </div>
-          <div>
-            <p className="font-semibold leading-tight">{property.title}</p>
-            <p className="text-sm text-muted-foreground">{property.address}</p>
+          <div className="min-w-0">
+            <p className="line-clamp-2 font-semibold leading-tight">{property.title}</p>
+            <p className="line-clamp-2 text-sm text-muted-foreground">{property.address}</p>
             {!property.enrichedAutomatically && (
               <p className="mt-1 text-xs text-muted-foreground italic">Manually entered</p>
             )}
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Remove property"
-          data-testid="remove-property"
-          onClick={() => removeProperty(property.id)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Edit property details"
+            data-testid="edit-property-details"
+            onClick={() => setEditOpen(true)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Remove property"
+            data-testid="remove-property"
+            onClick={() => removeProperty(property.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
+        <div className="mb-3 grid grid-cols-2 gap-3" data-testid="property-summary">
+          <SummaryField label="Bedrooms" value={property.bedrooms?.toString() ?? ""} />
+          <SummaryField label="Price" value={property.price ?? ""} />
+          <SummaryField label="Listed" value={property.listedDate ?? ""} />
+          <SummaryField label="Agent" value={property.sellingAgent ?? ""} />
+        </div>
         <StatusBadge property={property} />
-        {property.decision === "not_interested" && property.notInterestedReason && (
+        {property.decision === "not_interested" && (property.notInterestedReasons?.length ?? 0) > 0 && (
           <p className="mt-2 text-sm text-muted-foreground">
-            Reason: {property.notInterestedReason}
+            Reasons: {(property.notInterestedReasons ?? []).join(" · ")}
             {property.notInterestedDetail ? ` — ${property.notInterestedDetail}` : ""}
           </p>
         )}
@@ -105,6 +133,7 @@ export function PropertyCard({ property }: { property: Property }) {
         onOpenChange={setDecisionOpen}
       />
       <MakeOfferDialog property={property} open={offerOpen} onOpenChange={setOfferOpen} />
+      <EditPropertyDetailsDialog property={property} open={editOpen} onOpenChange={setEditOpen} />
     </Card>
   );
 }

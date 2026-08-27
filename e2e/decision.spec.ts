@@ -37,7 +37,7 @@ test.describe("Post-viewing interest decision", () => {
     await expect(card.getByTestId("make-offer")).toBeEnabled();
   });
 
-  test("Not Interested requires a reason, and Other requires free text, then archives", async ({
+  test("Not Interested requires at least one reason, and Other requires free text, then archives", async ({
     page,
   }) => {
     await signUp(page, uniqueUsername("notinterested"));
@@ -49,8 +49,7 @@ test.describe("Post-viewing interest decision", () => {
 
     await expect(page.getByTestId("confirm-not-interested")).toBeDisabled();
 
-    await page.getByTestId("not-interested-reason").click();
-    await page.getByRole("option", { name: "Other" }).click();
+    await page.getByTestId("reason-other").click();
     await expect(page.getByTestId("confirm-not-interested")).toBeDisabled();
 
     await page.getByTestId("not-interested-other-detail").fill("Too far from the train station");
@@ -63,5 +62,25 @@ test.describe("Post-viewing interest decision", () => {
     await page.getByTestId("tab-archived").click();
     await expect(page.getByText("Rejected House")).toBeVisible();
     await expect(page.getByText("Too far from the train station")).toBeVisible();
+  });
+
+  test("multiple reasons can be selected and all are archived with the property", async ({
+    page,
+  }) => {
+    await signUp(page, uniqueUsername("multireason"));
+    const card = await addAndBookProperty(page, "Multi Reason House");
+
+    await card.getByTestId("mark-attended").click();
+    await card.getByTestId("decide-interest").click();
+    await page.getByTestId("mark-not-interested").click();
+
+    await page.getByTestId("reason-price").click();
+    await page.getByTestId("reason-location").click();
+    await expect(page.getByTestId("confirm-not-interested")).toBeEnabled();
+    await page.getByTestId("confirm-not-interested").click();
+
+    await page.getByTestId("tab-archived").click();
+    const archivedCard = page.getByTestId("property-card").filter({ hasText: "Multi Reason House" });
+    await expect(archivedCard.getByText("Reasons: Price · Location")).toBeVisible();
   });
 });

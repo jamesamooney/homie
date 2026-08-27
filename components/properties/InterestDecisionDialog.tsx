@@ -3,16 +3,10 @@ import { toast } from "sonner";
 
 import type { NotInterestedReason, Property } from "@/types";
 import { useApp } from "@/context/AppContext";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +25,10 @@ const REASONS: NotInterestedReason[] = [
   "Other",
 ];
 
+function reasonSlug(reason: NotInterestedReason): string {
+  return reason.toLowerCase().replace(/[^a-z]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 interface InterestDecisionDialogProps {
   property: Property;
   open: boolean;
@@ -44,12 +42,12 @@ export function InterestDecisionDialog({
 }: InterestDecisionDialogProps) {
   const { decideInterested, decideNotInterested } = useApp();
   const [showNotInterestedForm, setShowNotInterestedForm] = useState(false);
-  const [reason, setReason] = useState<NotInterestedReason | "">("");
+  const [reasons, setReasons] = useState<NotInterestedReason[]>([]);
   const [detail, setDetail] = useState("");
 
   const reset = () => {
     setShowNotInterestedForm(false);
-    setReason("");
+    setReasons([]);
     setDetail("");
   };
 
@@ -64,15 +62,23 @@ export function InterestDecisionDialog({
     handleOpenChange(false);
   };
 
+  const toggleReason = (reason: NotInterestedReason) => {
+    setReasons((prev) =>
+      prev.includes(reason) ? prev.filter((r) => r !== reason) : [...prev, reason],
+    );
+  };
+
+  const includesOther = reasons.includes("Other");
+
   const handleConfirmNotInterested = () => {
-    if (!reason) return;
-    if (reason === "Other" && !detail.trim()) return;
-    decideNotInterested(property.id, reason, reason === "Other" ? detail.trim() : undefined);
+    if (reasons.length === 0) return;
+    if (includesOther && !detail.trim()) return;
+    decideNotInterested(property.id, reasons, detail.trim() || undefined);
     toast("Property archived under Not Interested.");
     handleOpenChange(false);
   };
 
-  const canConfirm = reason !== "" && (reason !== "Other" || detail.trim().length > 0);
+  const canConfirm = reasons.length > 0 && (!includesOther || detail.trim().length > 0);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -104,38 +110,48 @@ export function InterestDecisionDialog({
               <DialogTitle>What put you off?</DialogTitle>
               <DialogDescription>
                 This property will be archived, not deleted — you can still see it under
-                Archived, and your feedback is saved.
+                Archived, and your feedback is saved. Select every reason that applies.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Reason</Label>
-                <Select value={reason} onValueChange={(v) => setReason(v as NotInterestedReason)}>
-                  <SelectTrigger data-testid="not-interested-reason">
-                    <SelectValue placeholder="Select a reason" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {REASONS.map((r) => (
-                      <SelectItem key={r} value={r}>
-                        {r}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {reason === "Other" && (
-                <div className="space-y-2">
-                  <Label htmlFor="other-detail">Tell us more</Label>
-                  <Textarea
-                    id="other-detail"
-                    data-testid="not-interested-other-detail"
-                    value={detail}
-                    onChange={(e) => setDetail(e.target.value)}
-                    placeholder="What was it about this property?"
-                    required
-                  />
+              <div className="space-y-2" data-testid="not-interested-reasons">
+                <Label>Reasons</Label>
+                <div className="space-y-2 rounded-md border p-3">
+                  {REASONS.map((r) => (
+                    <label
+                      key={r}
+                      htmlFor={`reason-${reasonSlug(r)}`}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2 rounded-sm px-1 py-1 text-sm",
+                        "hover:bg-accent/50",
+                      )}
+                    >
+                      <input
+                        id={`reason-${reasonSlug(r)}`}
+                        data-testid={`reason-${reasonSlug(r)}`}
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-input accent-primary"
+                        checked={reasons.includes(r)}
+                        onChange={() => toggleReason(r)}
+                      />
+                      {r}
+                    </label>
+                  ))}
                 </div>
-              )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="other-detail">
+                  {includesOther ? "Tell us more" : "Anything else? (optional)"}
+                </Label>
+                <Textarea
+                  id="other-detail"
+                  data-testid="not-interested-other-detail"
+                  value={detail}
+                  onChange={(e) => setDetail(e.target.value)}
+                  placeholder="What was it about this property?"
+                  required={includesOther}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setShowNotInterestedForm(false)}>
